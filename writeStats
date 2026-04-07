@@ -1,0 +1,31 @@
+#!/bin/sh
+
+pad=18
+log_file="stats"
+input_file="/root/shared_stats.log"
+
+if [ ! -f "$input_file" ]; then
+    echo "Error: $input_file not found. Is the Mac cron running?"
+    exit 1
+fi
+
+raw_stats=$(cat "$input_file")
+cpuTemp=$(echo "$raw_stats" | awk -F: '/CPU die temperature/ {print $2}' | xargs)
+fanSpeed=$(echo "$raw_stats" | awk -F: '/Fan/ {print $2}' | xargs)
+systemUptime=$(uptime | awk -F, '{print $1}' | sed 's/.*up //')
+
+dateTime=$(date '+%d-%m-%Y %T')
+header="System stats: $dateTime"
+
+{
+    printf "%s\n" "$header"
+    printf "%$(echo ${#header})s" | tr ' ' '-'; printf "\n"
+    
+    printf "%-${pad}s %s\n" "Temperature" "${cpuTemp:-N/A}"
+    printf "%-${pad}s %s\n" "Fan Speed" "${fanSpeed:-N/A}"
+    printf "%-${pad}s %s\n" "System Uptime" "$systemUptime"
+} | tee "${log_file}.txt"
+
+base64 "${log_file}.txt" >> "${log_file}.enc"
+
+echo "Stats processed and encoded at $(date)"

@@ -23,7 +23,7 @@ header="System stats: $dateTime"
     
     printf "%-${pad}s %s\n" "Temperature" "${cpuTemp:-N/A}"
     printf "%-${pad}s %s\n" "Fan Speed" "${fanSpeed:-N/A}"
-    printf "%-${pad}s %s\n" "System Uptime" "$systemUptime"
+    printf "%-${pad}s %s\n\n" "System Uptime" "$systemUptime"
 } | tee "${log_file}.txt"
 
 base64 "${log_file}.txt" >> "${log_file}.enc"
